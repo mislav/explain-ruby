@@ -1,0 +1,38 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    cgi_multipart_eof_fix (2.5.0)
+    daemons (1.1.0)
+    fastthread (1.0.7)
+    gem_plugin (0.2.3)
+    haml (3.0.16)
+    mongrel (1.1.5)
+      cgi_multipart_eof_fix (>= 2.4)
+      daemons (>= 1.0.3)
+      fastthread (>= 1.0.1)
+      gem_plugin (>= 0.2.3)
+    mustache (0.11.2)
+    rack (1.2.1)
+    rdiscount (1.6.5)
+    rocco (0.4)
+      mustache
+      rdiscount
+    ruby2ruby (1.2.4)
+      ruby_parser (~> 2.0)
+      sexp_processor (~> 3.0)
+    ruby_parser (2.0.4)
+      sexp_processor (~> 3.0)
+    sexp_processor (3.0.4)
+    sinatra (1.0)
+      rack (>= 1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  haml
+  mongrel
+  mustache
+  rocco
+  ruby2ruby
+  sinatra
