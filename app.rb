@@ -1,8 +1,7 @@
 require 'sinatra'
-require 'ruby2ruby'
-require 'ruby_parser'
 require 'sass'
 require 'pp'
+require 'code'
 
 require 'mustache/sinatra'
 set :mustache, { :templates => './templates', :views => './views' }
@@ -46,18 +45,17 @@ helpers do
     }.join('')
   end
   
-  def rocco(filename, options = {}, &block)
+  def rocco(filename = default_title, options = {}, &block)
+    options = {:comment_chars => '>'}.update(options)
     Rocco.new(filename, [], options, &block).to_html
+  rescue Racc::ParseError
+    status 500
+    @message = "There was a parse error when trying to process Ruby code"
+    mustache :error
   end
   
-  def ruby2ruby(io, filename = io.path)
-    ruby2ruby = Ruby2Ruby.new
-    code = ruby2ruby.process ruby2sexp(io, filename)
-  end
-  
-  def ruby2sexp(io, filename = io.path)
-    parser = RubyParser.new
-    parser.process(io.read, filename)
+  def default_title
+    "Explain Ruby"
   end
 end
 
@@ -65,15 +63,30 @@ get '/' do
   mustache :home
 end
 
+post '/' do
+  if not params[:url].empty?
+    code = ExplainRuby::Code.from_url params[:url]
+    rocco { code.to_s }
+  elsif not params[:code].empty?
+    code = ExplainRuby::Code.new params[:code]
+    rocco { code.to_s } 
+  else
+    status "400 Not Chunky"
+    @message = "Please paste some code or enter a URL"
+    mustache :error
+  end
+end
+
 get '/f/:name' do
+  # content_type 'text/plain'
+  file = File.open("./fixtures/#{params[:name]}.rb")
+  rocco(file.path) { insert_explanations ruby2ruby(file) }
+end
+
+get '/f/:name/sexp' do
   content_type 'text/plain'
   file = File.open("./fixtures/#{params[:name]}.rb")
   ruby2sexp(file).pretty_inspect
-end
-
-get '/gen' do
-  file = File.open(__FILE__)
-  rocco("ExplainRuby.net") { ruby2ruby(file) }
 end
 
 get '/chunky.css' do

@@ -1,5 +1,7 @@
+require 'views/layout'
+
 module Sinatra::Application::Views
-  class Home < Mustache
+  class Home < Layout
   
   end
 end

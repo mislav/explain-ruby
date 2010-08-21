@@ -1,3 +1,36 @@
-body
-  font: medium/1.5 Helvetica, sans-serif
-  margin: 2em
+@import docco
+
+=clearing
+  &:after
+    content: " "
+    visibility: hidden
+    height: 0
+    font-size: 0
+    display: block
+    clear: both
+  * html &
+    height: 1px
+  *:first-child + html &
+    overflow: hidden
+
+h1
+  +clearing
+  .chunky
+    display: block
+    width: $width - 10
+    padding-right: 10px
+    text-align: right
+    float: left
+  .bacon
+    display: block
+    float: left
+    width: 3em
+    padding-left: 10px
+
+form
+  margin-left: $width + 10px
+  textarea, input[type=url]
+    display: block
+    width: 30em
+  textarea
+    height: 5em
