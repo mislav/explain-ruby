@@ -9,5 +9,5 @@ gem 'rocco'
 
 group :development do
   gem 'mongrel'
-  # gem 'shotgun'
+  gem 'shotgun'
 end

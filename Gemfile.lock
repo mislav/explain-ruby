@@ -23,6 +23,8 @@ GEM
     ruby_parser (2.0.4)
       sexp_processor (~> 3.0)
     sexp_processor (3.0.4)
+    shotgun (0.8)
+      rack (>= 1.0)
     sinatra (1.0)
       rack (>= 1.0)
 
@@ -35,4 +37,5 @@ DEPENDENCIES
   mustache
   rocco
   ruby2ruby
+  shotgun
   sinatra
