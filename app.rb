@@ -6,9 +6,7 @@ require 'code'
 require 'mustache/sinatra'
 set :mustache, { :templates => './templates', :views => './views' }
 
-require 'rocco'
-Rocco::Layout.template_path = Sinatra::Application.mustache[:templates]
-Rocco::Layout.template_name = 'rocco'
+require 'rocco_ext'
 
 helpers do
   def email_link(email)
@@ -46,7 +44,7 @@ helpers do
   end
   
   def rocco(filename = default_title, options = {}, &block)
-    options = {:comment_chars => '>'}.update(options)
+    options = settings.rocco.merge(options)
     Rocco.new(filename, [], options, &block).to_html
   rescue Racc::ParseError
     status 500
@@ -56,6 +54,14 @@ helpers do
   
   def default_title
     "Explain Ruby"
+  end
+  
+  def sass_with_caching(name)
+    time = ::File.mtime ::File.join(settings.views, "#{name}.sass")
+    expires 500, :public, :must_revalidate if settings.environment == :production
+    last_modified time
+    content_type 'text/css'
+    sass name
   end
 end
 
@@ -78,9 +84,8 @@ post '/' do
 end
 
 get '/f/:name' do
-  # content_type 'text/plain'
   file = File.open("./fixtures/#{params[:name]}.rb")
-  rocco(file.path) { insert_explanations ruby2ruby(file) }
+  rocco(file.path) { ExplainRuby::Code.new(file.read, file.path).to_s }
 end
 
 get '/f/:name/sexp' do
@@ -90,11 +95,9 @@ get '/f/:name/sexp' do
 end
 
 get '/chunky.css' do
-  content_type 'text/css'
-  sass :style
+  sass_with_caching :style
 end
 
 get '/docco.css' do
-  content_type 'text/css'
-  sass :docco
+  sass_with_caching :docco
 end

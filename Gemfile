@@ -7,6 +7,7 @@ gem 'mustache'
 gem 'ruby2ruby'
 gem 'rocco'
 gem 'nokogiri'
+gem 'ultraviolet'
 
 group :development do
   gem 'mongrel'

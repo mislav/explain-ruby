@@ -13,6 +13,8 @@ GEM
       gem_plugin (>= 0.2.3)
     mustache (0.11.2)
     nokogiri (1.4.3.1)
+    oniguruma (1.1.0)
+    plist (3.1.0)
     rack (1.2.1)
     rake (0.8.7)
     rdiscount (1.6.5)
@@ -30,6 +32,11 @@ GEM
       rack (>= 1.0)
     sinatra (1.0)
       rack (>= 1.0)
+    textpow (0.10.1)
+      oniguruma (>= 1.1.0)
+      plist (>= 3.0.0)
+    ultraviolet (0.10.2)
+      textpow (>= 0.10.0)
 
 PLATFORMS
   ruby
@@ -45,3 +52,4 @@ DEPENDENCIES
   ruby2ruby
   shotgun
   sinatra
+  ultraviolet

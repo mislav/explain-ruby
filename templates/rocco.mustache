@@ -5,8 +5,8 @@
   <title>{{ title }}</title>
   <link rel="stylesheet" href="/docco.css">
 </head>
-<body>
-<div id='container'>
+<body class="{{ highlight_style }}">
+<div id="container">
   <div id="background"></div>
   {{#sources?}}
   <div id="jump_to">
@@ -37,7 +37,7 @@
         {{{ docs }}}
       </td>
       <td class=code>
-        <div class='highlight'><pre>{{{ code }}}</pre></div>
+        <pre>{{{ code }}}</pre>
       </td>
     </tr>
     {{/sections}}
