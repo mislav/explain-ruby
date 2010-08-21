@@ -11,5 +11,6 @@ gem 'nokogiri'
 group :development do
   gem 'mongrel'
   gem 'shotgun'
+  gem 'rake'
   gem 'rspec'
 end

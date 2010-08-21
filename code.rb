@@ -79,6 +79,7 @@ module ExplainRuby
       raise ArgumentError, "no code given" if code.nil? or code.empty?
       @code = code.to_s
       @url = url.nil?? nil : url.to_s
+      @reconstructed_code = nil
       @explained_code = nil
     end
     
@@ -87,7 +88,11 @@ module ExplainRuby
     end
     
     def process
-      insert_explanations ruby2ruby(@code, @url)
+      insert_explanations reconstruct_code
+    end
+    
+    def reconstruct_code
+      @reconstructed_code ||= ruby2ruby(@code, @url)
     end
     
     EXPLANATIONS_PATH = File.expand_path('../explanations', __FILE__)
@@ -171,6 +176,18 @@ if $0 == __FILE__
       it "returns nil when no code" do
         code = described_class.extract_code_from_html body_no_code
         code.should be_nil
+      end
+    end
+    
+    describe "#reconstruct_code" do
+      it "inserts explanation markers" do
+        code = described_class.new("class Klass < Main; end")
+        code.reconstruct_code.should == ">> class class_inheritance\nclass Klass < Main\nend"
+      end
+      
+      it "doesn't insert same marker twice" do
+        code = described_class.new("def foo() 1 end; def bar() 2 end")
+        code.reconstruct_code.should == ">> method\ndef foo\n  1\nend\n\ndef bar\n  2\nend\n"
       end
     end
   end

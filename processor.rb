@@ -20,7 +20,7 @@ module ExplainRuby
     
       if explanations.any?
         @explained += explanations
-        "\n>> #{explanations.join(' ')}\n"
+        ">> #{explanations.join(' ')}\n"
       else
         "\n"
       end
@@ -40,7 +40,7 @@ module ExplainRuby
     end
   
     def process_class(exp)
-      Sexp === exp[1] and exp[1].sexp_type == :const and also(:inheritance)
+      Sexp === exp[1] and exp[1].sexp_type == :const and also(:class_inheritance)
       mark(:class) + super
     end
   
