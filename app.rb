@@ -84,14 +84,14 @@ post '/' do
 end
 
 get '/f/:name' do
-  file = File.open("./fixtures/#{params[:name]}.rb")
-  rocco(file.path) { ExplainRuby::Code.new(file.read, file.path).to_s }
+  code = ExplainRuby::Code.from_test_fixture(params[:name])
+  rocco(code.url) { code.to_s }
 end
 
 get '/f/:name/sexp' do
   content_type 'text/plain'
-  file = File.open("./fixtures/#{params[:name]}.rb")
-  ruby2sexp(file).pretty_inspect
+  code = ExplainRuby::Code.from_test_fixture(params[:name])
+  code.pretty_inspect
 end
 
 get '/chunky.css' do

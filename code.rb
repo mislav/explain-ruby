@@ -81,6 +81,7 @@ module ExplainRuby
       @url = url.nil?? nil : url.to_s
       @reconstructed_code = nil
       @explained_code = nil
+      @sexp = nil
     end
     
     def to_s
@@ -91,11 +92,21 @@ module ExplainRuby
       insert_explanations reconstruct_code
     end
     
+    def parse
+      @sexp ||= self.class.ruby2sexp(@code, @url)
+    end
+    
+    # delegate pretty printing to sexp
+    def pretty_print(io)
+      parse.pretty_print(io)
+    end
+    
     def reconstruct_code
-      @reconstructed_code ||= ruby2ruby(@code, @url)
+      @reconstructed_code ||= self.class.ruby2ruby(parse, @url)
     end
     
     EXPLANATIONS_PATH = File.expand_path('../explanations', __FILE__)
+    FIXTURES_PATH = File.expand_path('../fixtures', __FILE__)
   
     def self.get_explanation(name)
       begin
@@ -112,22 +123,30 @@ module ExplainRuby
       }
     end
   
-    def ruby2ruby(io, filename = nil)
-      filename = io.path if filename.nil? and io.respond_to? :path
+    def self.ruby2ruby(input, filename = nil)
+      filename = input.path if filename.nil? and input.respond_to? :path
+      input = ruby2sexp(input, filename) unless ::Sexp === input
       ruby2ruby = Processor.new
-      ruby2ruby.process ruby2sexp(io, filename)
+      ruby2ruby.process input
     end
   
-    def ruby2sexp(io, filename = io.path)
+    def self.ruby2sexp(io, filename = io.path)
       code = io.respond_to?(:read) ? io.read : io.to_s
       parser = ::RubyParser.new
       parser.process(code, filename)
+    end
+    
+    def self.from_test_fixture(name)
+      File.open(FIXTURES_PATH + "/#{name}.rb") do |file|
+        new(file.read, file.path)
+      end
     end
   end
 end
 
 if $0 == __FILE__
   require 'spec/autorun'
+  require 'pp'
   
   body_code, body_no_code, body_gist, body_gist_no_ruby = DATA.read.split('===')
   
@@ -189,6 +208,11 @@ if $0 == __FILE__
         code = described_class.new("def foo() 1 end; def bar() 2 end")
         code.reconstruct_code.should == ">> method\ndef foo\n  1\nend\n\ndef bar\n  2\nend\n"
       end
+    end
+    
+    it "delegates pretty printing to sexp" do
+      code = described_class.new("class Klass; end")
+      code.pretty_inspect.should == "s(:class, :Klass, nil, s(:scope))\n"
     end
   end
 end
