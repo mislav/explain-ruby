@@ -1,0 +1,76 @@
+@import docco
+
+=clearing
+  &:after
+    content: " "
+    visibility: hidden
+    height: 0
+    font-size: 0
+    display: block
+    clear: both
+  * html &
+    height: 1px
+  *:first-child + html &
+    overflow: hidden
+
+#home h1
+  margin-left: $middle_margin
+  margin-bottom: 1.2em
+
+#primer
+  margin: 0 25px 0 $middle_margin
+  float: left
+  width: $width - (25 + $middle_margin)
+  
+form
+  float: left
+  margin-left: 20px
+  width: 960px - $width - 20px
+  textarea, input[type=url]
+    display: block
+    border: 1px solid silver
+    padding: 4px 6px
+    width: 100%
+  textarea
+    height: 10em
+    font: 11px Monaco, monospace
+  input[type=url]
+    font-size: 15px
+  p.note
+    margin-top: -.5em
+    font-size: 85%
+    font-style: italic
+    color: gray
+
+.docs
+  h2
+    font-size: 1.2em
+    margin-top: 0
+    margin-bottom: .3em
+    code
+      font-size: 80%
+    &:before
+      content: "Also here: "
+      color: gray
+      font-size: 90%
+      font-weight: normal
+      margin-right: .2em
+  .octowrap + h2:before
+    content: ""
+  p code
+    font-size: 80%
+  pre
+    font-size: 14px !important
+  p
+    a:link, a:active
+      color: darkblue !important
+    a:visited
+      color: inherit
+th.docs
+  h1 + p
+    color: gray
+    font: 12px Helvetica, sans-serif
+td.docs
+  padding-bottom: 1em !important
+td.code, th.code
+  padding-left: $middle_margin / 2

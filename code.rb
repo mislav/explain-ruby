@@ -1,6 +1,7 @@
 require 'nokogiri'
 require 'ruby_parser'
 require 'processor'
+require 'digest/md5'
 require 'net/http'
 # TODO: SSL support
 # require 'net/https'
@@ -14,7 +15,7 @@ end
 module ExplainRuby
   module FromUrl
     def from_url(url)
-      code = if raw_url = get_raw_url(url)
+      if raw_url = get_raw_url(url)
         get_raw_body(raw_url)
       else
         response = get_http_response(url)
@@ -24,8 +25,6 @@ module ExplainRuby
           response.body
         end
       end
-      
-      new(code, raw_url || url)
     end
     
     def extract_code_from_html(doc)
@@ -75,13 +74,81 @@ module ExplainRuby
   class Code
     extend FromUrl
     
-    def initialize(code, url = nil)
-      raise ArgumentError, "no code given" if code.nil? or code.empty?
-      @code = code.to_s
-      @url = url.nil?? nil : url.to_s
+    attr_reader :attributes
+    
+    def initialize(attributes)
+      @attributes = attributes
       @reconstructed_code = nil
       @explained_code = nil
       @sexp = nil
+    end
+    
+    def [](key)
+      @attributes[key.to_s]
+    end
+    
+    def []=(key, value)
+      @attributes[key.to_s] = value
+    end
+    
+    def slug() self['slug'] end
+    def md5() self['md5'] end
+    def url() self['url'] end
+    
+    class << self
+      attr_accessor :mongo
+    end
+    
+    def self.from_url(url)
+      find_or('url' => url) do |params|
+        create(super) { |obj| obj.attributes.update(params) }
+      end
+    end
+    
+    def self.create(code)
+      md5 = md5_digest code
+      
+      find_or('md5' => md5) do |params|
+        obj = new({'code' => code}.update(params))
+        yield obj if block_given?
+        obj.save
+      end
+    end
+    
+    def self.find_or(query)
+      if record = mongo.find_one(query, :fields => 'slug')
+        new(record)
+      else
+        yield query
+      end
+    end
+    
+    def self.exists?(query)
+      !!mongo.find_one(query, :fields => [])
+    end
+    
+    def self.md5_digest(code)
+      Digest::MD5.hexdigest code.strip
+    end
+    
+    def self.find(slug)
+      record = mongo.find_one(:slug => slug) and new(record)
+    end
+    
+    SEED = ('a'..'z').to_a
+    
+    def self.generate_slug
+      (1..3).map { SEED[rand(SEED.length)] }.join('').tap do |slug|
+        slug << SEED[rand(SEED.length)] while exists?(:slug => slug)
+      end
+    end
+    
+    def save
+      self['md5'] ||= self.class.md5_digest(self['code'])
+      self['slug'] ||= self.class.generate_slug
+      self['created_at'] ||= Time.now
+      self.class.mongo.save(@attributes, :safe => true)
+      self
     end
     
     def to_s
@@ -93,7 +160,7 @@ module ExplainRuby
     end
     
     def parse
-      @sexp ||= self.class.ruby2sexp(@code, @url)
+      @sexp ||= self.class.ruby2sexp(self['code'], self['url'])
     end
     
     # delegate pretty printing to sexp
@@ -102,7 +169,7 @@ module ExplainRuby
     end
     
     def reconstruct_code
-      @reconstructed_code ||= self.class.ruby2ruby(parse, @url)
+      @reconstructed_code ||= self.class.ruby2ruby(parse, self['url'])
     end
     
     EXPLANATIONS_PATH = File.expand_path('../explanations', __FILE__)
@@ -138,7 +205,7 @@ module ExplainRuby
     
     def self.from_test_fixture(name)
       File.open(FIXTURES_PATH + "/#{name}.rb") do |file|
-        new(file.read, file.path)
+        new('code' => file.read, 'url' => file.path)
       end
     end
   end
@@ -200,18 +267,18 @@ if $0 == __FILE__
     
     describe "#reconstruct_code" do
       it "inserts explanation markers" do
-        code = described_class.new("class Klass < Main; end")
+        code = described_class.new('code' => "class Klass < Main; end")
         code.reconstruct_code.should == ">> class class_inheritance\nclass Klass < Main\nend"
       end
       
       it "doesn't insert same marker twice" do
-        code = described_class.new("def foo() 1 end; def bar() 2 end")
+        code = described_class.new('code' => "def foo() 1 end; def bar() 2 end")
         code.reconstruct_code.should == ">> method\ndef foo\n  1\nend\n\ndef bar\n  2\nend\n"
       end
     end
     
     it "delegates pretty printing to sexp" do
-      code = described_class.new("class Klass; end")
+      code = described_class.new('code' => "class Klass; end")
       code.pretty_inspect.should == "s(:class, :Klass, nil, s(:scope))\n"
     end
   end

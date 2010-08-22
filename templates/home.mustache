@@ -1,12 +1,31 @@
-<h1><span class="chunky">Explain</span> <span class="bacon">Ruby</span></h1>
+<h1>{{ title }}</h1>
 
-<p>
-  Paste code or a URL ➝ get Ruby syntax explained
-</p>
+<div id="primer">
+  <p>
+    Paste Ruby code or a URL to get Ruby syntax explained.
+  </p>
+  
+  <p>
+    <i>Explain Ruby</i> will not be able to explain what the code in question <em>does</em>, i.e. the original author's intent, but it will help newcomers to Ruby to learn how to read code by teaching them programming constructs of the Ruby programming language.
+  </p>
+  
+  <p>
+    This is still in experimental phase. Some syntaxes are not yet documented, and there might be formatting bugs in the output.
+  </p>
+  
+  <p>
+    Special thanks to Ryan Tomayko for <a href="http://rtomayko.github.com/rocco/">Rocco</a> which is used for final formatting of results on this site.
+  </p>
+  
+  <p>
+    Made by <a href="http://twitter.com/mislav">@mislav</a> <strong>in memory of Why The Lucky Stiff</strong>.
+  </p>
+</div>
 
 <form action="/" method="post">
   <p><label>Ruby code: <textarea name="code"></textarea></label></p>
   <p><label>Alternatively, paste a URL: <input type="url" name="url"></label></p>
+  <p class="note">URL can point to a Gist, Pastie, file on GitHub, a HTML page with code on it, or directly to a Ruby script.</p>
   <div class="actions">
     <input type="submit" value="Explain">
   </div>

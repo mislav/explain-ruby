@@ -1,11 +1,16 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    bson (1.0.4)
+    bson_ext (1.0.4)
     cgi_multipart_eof_fix (2.5.0)
     daemons (1.1.0)
     fastthread (1.0.7)
     gem_plugin (0.2.3)
     haml (3.0.16)
+    mongo (1.0.7)
+      bson (>= 1.0.4)
+    mongo_ext (0.19.3)
     mongrel (1.1.5)
       cgi_multipart_eof_fix (>= 2.4)
       daemons (>= 1.0.3)
@@ -42,7 +47,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bson_ext
   haml
+  mongo
+  mongo_ext
   mongrel
   mustache
   nokogiri

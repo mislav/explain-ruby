@@ -8,6 +8,9 @@ gem 'ruby2ruby'
 gem 'rocco'
 gem 'nokogiri'
 gem 'ultraviolet'
+gem 'mongo'
+gem 'mongo_ext'
+gem 'bson_ext'
 
 group :development do
   gem 'mongrel'

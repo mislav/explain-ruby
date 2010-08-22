@@ -2,6 +2,13 @@ require 'sinatra'
 require 'sass'
 require 'pp'
 require 'code'
+require 'mongo'
+
+configure :development do
+  connection = Mongo::Connection.from_uri 'mongodb://localhost'
+  db = connection.db('explainruby')
+  ExplainRuby::Code.mongo = db.collection('results')
+end
 
 require 'mustache/sinatra'
 set :mustache, { :templates => './templates', :views => './views' }
@@ -13,15 +20,8 @@ helpers do
     "<a href='mailto:#{email}'>#{email}</a>"
   end
   
-  def link_to(object)
-    case object
-    when Project
-      "<a href='#{project_path(object)}'>#{object.name}</a>"
-    when Company
-      "<a href='#{company_path(object)}'>#{object.name}</a>"
-    else
-      raise ArgumentError
-    end
+  def redirect_to(code)
+    redirect "/#{code.slug}"
   end
   
   def image_tag(file, attributes = {})
@@ -69,13 +69,18 @@ get '/' do
   mustache :home
 end
 
+get '/url/*:url' do
+  code = ExplainRuby::Code.from_url params[:url]
+  redirect_to code
+end
+
 post '/' do
   if not params[:url].empty?
     code = ExplainRuby::Code.from_url params[:url]
-    rocco { code.to_s }
+    redirect_to code
   elsif not params[:code].empty?
-    code = ExplainRuby::Code.new params[:code]
-    rocco { code.to_s } 
+    code = ExplainRuby::Code.create params[:code]
+    redirect_to code
   else
     status "400 Not Chunky"
     @message = "Please paste some code or enter a URL"
@@ -94,10 +99,17 @@ get '/f/:name/sexp' do
   code.pretty_inspect
 end
 
-get '/chunky.css' do
-  sass_with_caching :style
+get '/explain.css' do
+  sass_with_caching :explain
 end
 
 get '/docco.css' do
   sass_with_caching :docco
+end
+
+get %r!^/([a-z0-9]{3,})$! do
+  code = ExplainRuby::Code.find params[:captures][0]
+  halt 404 unless code
+  etag code.md5
+  rocco { code.to_s }
 end

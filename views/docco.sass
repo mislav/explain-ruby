@@ -1,6 +1,7 @@
 /* yanked from: http://jashkenas.github.com/docco/resources/docco.css
 
 $width: 575px
+$middle_margin: 50px
 
 body
   font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif
@@ -81,10 +82,10 @@ table td
   outline: 0
 
 td.docs, th.docs
-  max-width: $width - (25 + 50)
-  min-width: $width - (25 + 50)
+  max-width: $width - (25 + $middle_margin)
+  min-width: $width - (25 + $middle_margin)
   min-height: 5px
-  padding: 10px 25px 1px 50px
+  padding: 10px 25px 1px $middle_margin
   vertical-align: top
   text-align: left
 
@@ -119,12 +120,12 @@ td
   &.docs:hover .octothorpe
     opacity: 1
   &.code
-    padding: 14px 15px 16px 50px
+    padding: 14px 15px 16px $middle_margin
     width: 100%
     vertical-align: top
 
 th.code
-  padding: 14px 15px 16px 50px
+  padding: 14px 15px 16px $middle_margin
   width: 100%
   vertical-align: top
 

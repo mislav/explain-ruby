@@ -18,12 +18,25 @@ module ExplainRuby
       @also.clear
       explanations.reject! { |e| @explained.include? e }
     
-      if explanations.any?
+      if explanations.any? and context_ok?
         @explained += explanations
         ">> #{explanations.join(' ')}\n"
-      else
+      elsif not in_args?
+        # "\n#{context.inspect}\n"
         "\n"
+      else
+        ""
       end
+    end
+    
+    def context_ok?
+      ( context[1] == :block or
+        context[1, 2] == [:scope, :sclass] ) and
+        not in_args?
+    end
+    
+    def in_args?
+      context.include? :args
     end
   
     def process_block(exp)
@@ -81,6 +94,18 @@ module ExplainRuby
   
     def process_cdecl(exp)
       mark(:constant) + super
+    end
+  
+    def process_lasgn(exp)
+      mark(:variable_local) + super
+    end
+  
+    def process_iasgn(exp)
+      mark(:variable_instance) + super
+    end
+  
+    def process_cvdecl(exp)
+      mark(:variable_class) + super
     end
   
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
