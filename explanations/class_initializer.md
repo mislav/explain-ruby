@@ -1,0 +1,3 @@
+## Class initializer
+
+The "initialize" method, if defined, is the method that always gets invoked automatically on each new instance of the class. It is used to initialize instance variables and process given arguments, if any. For example, if a "person" object is instantiated with `Person.new("Ruby")`, the "initialize" method would get called with a single argument with a value of "Ruby". By default, all arguments that `new` was called with are forwarded to the "initialize" method of the new instance.

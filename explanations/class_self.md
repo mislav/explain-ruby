@@ -1,0 +1,3 @@
+## Singleton class access
+
+This construct is a way to enter the scope of the current singleton class, otherwise known as "metaclass". The concept of a singleton class is somewhat advanced; accessing it is often referred to as "metaprogramming". In simple terms, every class and module in Ruby has its singleton class, and defining instance methods on the singleton class actually defines *class* methods on the corresponding class/module. The `class << self` construct is most commonly used to define class methods without having to use the "self." prefix which would otherwise be required.

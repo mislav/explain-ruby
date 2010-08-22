@@ -1,0 +1,3 @@
+## Module definition
+
+A module groups together method definitions, constants, classes and other modules. Modules can be *included* by classes and other modules to import the original module's methods; this behaves similar to class inheritance but is not limited to a single include. Modules are also often used to group together other classes and modules which effectively provides a *namespace* for them; for instance "Net" is a module from Ruby standard library that serves as a namespace for `Net::HTTP` and related classes.

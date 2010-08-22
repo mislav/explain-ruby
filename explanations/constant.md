@@ -1,0 +1,5 @@
+## Constant
+
+A *constant* is a pointer to an object, just like a variable. Their names start with an uppercase letter, and they are often all in uppercase. The difference from a variable is that a constant shouldn't be reassigned to another object; Ruby will allow it but issue an "already initialized constant" warning. Constants are usually used to hold bits of hardcoded data used in a namespace, e.g. `HTTPVersion = "1.1"` can be found in "Net::HTTP" and is used internally when communicating over HTTP.
+
+Another thing that might not be immediately obvious is that names of classes and modules are constants, too; they start with an uppercase letter. These are regular constants which point to an object that represents the class or module. For instance, there are three constants in the expression "Net::HTTP::HTTPVersion": the first one points to the "Net" module, the second one to the "HTTP" class inside the first module, and the third one points to the string "1.1" (as mentioned above).

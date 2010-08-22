@@ -1,0 +1,3 @@
+## "Setter" method
+
+A method that ends with an equal sign (`=`) is otherwise known as a "setter" method. Defining setter methods (or using `attr_writer`/`attr_accessor` to generate them) is the only way to enable assignment-like syntax for properties of the class. A setter method must take an argument. For example, the setter method "name=" on a "Person" class can be invoked in two styles: `person.name=("Ruby")` or `person.name = "Ruby"`. The syntaxes both perform the same function but the second one is preferred since it looks like regular variable assignment.

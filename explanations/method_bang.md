@@ -1,0 +1,3 @@
+## "Bang" method
+
+A method that ends with an exclamation point (`!`) is otherwise known as a "bang" method. These methods are like any other methods, but since the exclamation point distinguishes them from other method calls, they are are most commonly used for destructive operations that either change the receiving object or trigger an irreversible operation. Sometimes a regular method will have its "bang" counterpart; for instance a lot methods on Array objects have counterparts with an exclamation point in the name, indicating the second method *changes* the array object instead of returning a new one; e.g. `array.reverse` returns a new array which is the reversed copy of the original, while `array.reverse!` changes the original array without making a copy.

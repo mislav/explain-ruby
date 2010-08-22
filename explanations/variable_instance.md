@@ -1,0 +1,3 @@
+## Instance variable
+
+An instance variable is a pointer to an object and is available only inside a single object (an "instance"). They start with a single `@` character. These variables are used to carry object state, which differentiates one instance from another. An instance variable can be accessed before it is even assigned; its default value will be nil. However, in verbose mode the ruby interpreter will issue a warning about accessing a variable that is not declared. Instance variables are often initialized in the "initialize" method in a class.

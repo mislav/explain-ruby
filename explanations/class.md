@@ -1,3 +1,3 @@
 ## Class definition
 
-A class definition.
+The `class` keyword defines a named class. Classes are objects which group together methods that will be properties of objects instantiated from the class. Every object in Ruby is an instance of a class; e.g. numbers are instances of the "Numeric" class and strings of the "String" class. The same way they are created, classes can be reopened and new methods can be added to them; when that happens, newly added methods are instantly available on all existing objects of that class.

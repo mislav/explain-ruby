@@ -1,0 +1,3 @@
+## Module include
+
+The `include` method allows a module to be included in a class or another module. The module being included is commonly referred to as "mixin", because its methods are being *mixed-in* with existing methods in the current class/module. Multiple modules can be included in the same object, and even if new methods are defined in the included model afterwards, these methods will immediately be available in every object where this module was mixed-in.

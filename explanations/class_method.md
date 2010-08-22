@@ -1,0 +1,3 @@
+## Class method
+
+A *class method*, denoted by the "self." prefix on its name, is a method that can be called directly on a class or module without needing to create an instance of that class. This is opposed to regular *instance methods* which are only available on instances of a class. Class methods are used to implement behavior that this class is responsible for, but which isn't tied to any particular instance.
