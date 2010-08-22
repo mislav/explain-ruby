@@ -10,6 +10,14 @@ Rocco::Layout.class_eval do
   def highlight_style
     @doc.options[:uv_style]
   end
+  
+  def url
+    @doc.options[:url]
+  end
+  
+  def url?
+    !!url
+  end
 end
 
 Rocco.class_eval do

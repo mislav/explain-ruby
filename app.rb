@@ -20,6 +20,10 @@ helpers do
     "<a href='mailto:#{email}'>#{email}</a>"
   end
   
+  def link_to(text, path)
+    "<a href='#{path}'>#{text}</a>"
+  end
+  
   def redirect_to(code)
     redirect "/#{code.slug}"
   end
@@ -43,9 +47,9 @@ helpers do
     }.join('')
   end
   
-  def rocco(filename = default_title, options = {}, &block)
+  def rocco(options = {}, &block)
     options = settings.rocco.merge(options)
-    Rocco.new(filename, [], options, &block).to_html
+    Rocco.new(default_title, [], options, &block).to_html
   rescue Racc::ParseError
     status 500
     @message = "There was a parse error when trying to process Ruby code"
@@ -90,7 +94,7 @@ end
 
 get '/f/:name' do
   code = ExplainRuby::Code.from_test_fixture(params[:name])
-  rocco(code.url) { code.to_s }
+  rocco(:url => code.url) { code.to_s }
 end
 
 get '/f/:name/sexp' do
@@ -111,5 +115,5 @@ get %r!^/([a-z0-9]{3,})$! do
   code = ExplainRuby::Code.find params[:captures][0]
   halt 404 unless code
   etag code.md5
-  rocco { code.to_s }
+  rocco(:url => code.url) { code.to_s }
 end

@@ -23,7 +23,12 @@
   <table cellspacing=0 cellpadding=0>
   <thead>
     <tr>
-      <th class=docs><h1>{{ title }}</h1></th>
+      <th class=docs>
+        <h1>{{ title }}</h1>
+        {{#url?}}
+        <p>Code from: <a href="{{ url }}">{{ url }}</a></p>
+        {{/url?}}
+      </th>
       <th class=code></th>
     </tr>
   </thead>
