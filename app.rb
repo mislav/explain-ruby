@@ -16,35 +16,8 @@ set :mustache, { :templates => './templates', :views => './views' }
 require 'rocco_ext'
 
 helpers do
-  def email_link(email)
-    "<a href='mailto:#{email}'>#{email}</a>"
-  end
-  
-  def link_to(text, path)
-    "<a href='#{path}'>#{text}</a>"
-  end
-  
   def redirect_to(code)
     redirect "/#{code.slug}"
-  end
-  
-  def image_tag(file, attributes = {})
-    attributes = attributes.merge(:src => "/images/#{file}")
-    attributes[:alt] ||= ''
-    "<img#{html_attributes(attributes)}>"
-  end
-  
-  def html_attributes(hash)
-    hash.map { |key, value|
-      case value
-      when NilClass, FalseClass
-        ''
-      when TrueClass
-        " #{key}"
-      else
-        " #{key}='#{value}'"
-      end
-    }.join('')
   end
   
   def rocco(options = {}, &block)
