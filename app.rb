@@ -4,6 +4,8 @@ require 'pp'
 require 'code'
 require 'mongo'
 
+set :sass, { :cache_location => File.join(ENV['TMPDIR'], '.sass-cache') }
+
 configure :development do
   connection = Mongo::Connection.from_uri 'mongodb://localhost'
   db = connection.db('explainruby')
