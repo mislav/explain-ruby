@@ -1,5 +1,16 @@
 require 'uv'
-require 'rocco'
+
+begin
+  if ENV['TMPDIR']
+    original_path = ENV['PATH']
+    ENV['PATH'] = ENV['TMPDIR'] + ":" + ENV['PATH']
+    require 'fileutils'
+    FileUtils.touch File.join(ENV['TMPDIR'], 'pygmentize')
+  end
+  require 'rocco'
+ensure
+  ENV['PATH'] = original_path if ENV['TMPDIR']
+end
 
 set :rocco, { :comment_chars => '>', :uv_style => 'dawn' }
 
