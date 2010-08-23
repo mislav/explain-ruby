@@ -10,6 +10,12 @@ configure :development do
   ExplainRuby::Code.mongo = db.collection('results')
 end
 
+configure :production do
+  connection = Mongo::Connection.from_uri ENV['MONGOHQ_URL']
+  db = connection.db(connection.auths.last['db_name'])
+  ExplainRuby::Code.mongo = db.collection('results')
+end
+
 require 'mustache/sinatra'
 set :mustache, { :templates => './templates', :views => './views' }
 
