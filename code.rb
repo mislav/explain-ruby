@@ -7,7 +7,7 @@ require 'net/http'
 # require 'net/https'
 
 Net::HTTPResponse.class_eval do
-  def http?
+  def html?
     content_type == 'text/html' or content_type == 'application/xhtml+xml'
   end
 end
