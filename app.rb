@@ -51,7 +51,11 @@ helpers do
 end
 
 get '/' do
-  mustache :home
+  if request.host == 'explainruby.heroku.com'
+    redirect 'http://explainruby.net'
+  else
+    mustache :home
+  end
 end
 
 get '/url/*' do
