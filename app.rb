@@ -54,8 +54,8 @@ get '/' do
   mustache :home
 end
 
-get '/url/*:url' do
-  code = ExplainRuby::Code.from_url params[:url]
+get '/url/*' do
+  code = ExplainRuby::Code.from_url params[:splat].join('')
   redirect_to code
 end
 
