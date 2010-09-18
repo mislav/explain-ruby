@@ -30,8 +30,10 @@ module ExplainRuby
     end
     
     def context_ok?
-      ( context[1] == :block or
-        context[1, 2] == [:scope, :sclass] ) and
+      ( context[1].nil? or
+        context[1] == :block or
+        context[1, 2] == [:scope, :sclass] or
+        context[1, 2] == [:scope, :module] ) and
         not in_args?
     end
     
