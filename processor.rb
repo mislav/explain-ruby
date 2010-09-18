@@ -110,6 +110,10 @@ module ExplainRuby
       mark(:variable_class) + super
     end
   
+    def process_super(exp)
+      mark(:super) + super
+    end
+  
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
   
     def process_call(exp)
