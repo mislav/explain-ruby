@@ -99,7 +99,11 @@ module ExplainRuby
     end
   
     def process_lasgn(exp)
-      mark(:variable_local) + super
+      if [:masgn, :iter].include?(context[1]) 
+        super
+      else
+        mark(:variable_local) + super
+      end
     end
   
     def process_iasgn(exp)

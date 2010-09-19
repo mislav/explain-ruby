@@ -160,7 +160,7 @@ module ExplainRuby
     end
     
     def parse
-      @sexp ||= self.class.ruby2sexp(self['code'], self['url'])
+      self.class.ruby2sexp(self['code'], self['url'])
     end
     
     # delegate pretty printing to sexp
@@ -269,6 +269,16 @@ if $0 == __FILE__
       it "inserts explanation markers" do
         code = described_class.new('code' => "class Klass < Main; end")
         code.reconstruct_code.should == ">> class class_inheritance\nclass Klass < Main\nend"
+      end
+      
+      it "outputs curly brackets for one lined block arguments" do
+        code = described_class.new('code' => "foo { |one, two| one }")
+        code.reconstruct_code.should == "foo { |one, two| one }"
+      end
+      
+      it "outputs 'do' and 'end' for multi lined block arguments" do
+        code = described_class.new('code' => "foo { |one, two| one; two }")
+        code.reconstruct_code.should == "foo do |one, two|\n  one\n  two\nend"
       end
       
       it "doesn't insert same marker twice" do
