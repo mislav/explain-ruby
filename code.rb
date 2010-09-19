@@ -265,6 +265,13 @@ if $0 == __FILE__
       end
     end
     
+    describe "explains" do
+      it "ternary statements" do
+        code = described_class.new('code' => 'this ? that : them')
+        code.reconstruct_code.should == ">> if\nthis ? (that) : (them)"
+      end
+    end
+    
     describe "#reconstruct_code" do
       it "inserts explanation markers" do
         code = described_class.new('code' => "class Klass < Main; end")

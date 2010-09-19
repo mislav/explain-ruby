@@ -113,6 +113,10 @@ module ExplainRuby
     def process_cvdecl(exp)
       mark(:variable_class) + super
     end
+    
+    def process_if(exp)
+      mark(:if) + super
+    end
   
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
   
