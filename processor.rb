@@ -158,6 +158,13 @@ module ExplainRuby
       mark(:for) + result.join("\n")
     end
     
+    # "string" =~ /regex/
+    def process_match3(exp)
+      mark(:tilde_match) + super
+    end
+
+    alias_method :process_match2, :process_match3
+
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
     SPECIALS = [:colon2]
   
