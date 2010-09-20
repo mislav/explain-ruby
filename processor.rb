@@ -119,10 +119,13 @@ module ExplainRuby
     end
   
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
+    SPECIALS = [:colon2]
   
     def process_call(exp)
       if exp[0].nil? and CALLS.include? exp[1]
         mark(exp[1]) + super
+      elsif !exp[0].nil? and SPECIALS.include? exp[0][0]
+        mark(exp[0][0]) + super
       else
         super
       end
