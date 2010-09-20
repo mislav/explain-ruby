@@ -117,6 +117,11 @@ module ExplainRuby
     def process_if(exp)
       mark(:if) + super
     end
+    
+    # ::Foo
+    def process_colon3(exp)
+      mark(:colon3) + super
+    end
   
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
     SPECIALS = [:colon2]
