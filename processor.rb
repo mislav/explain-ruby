@@ -129,9 +129,19 @@ module ExplainRuby
       mark(:defined) + super
     end
     
-    #  1..5 
+    # Literal values are objects that are:
+    # Numeric
+    # Symbol
+    # Range
+    # And maybe more
     def process_lit(exp)
-      mark(:dot2) + super
+      case exp[0]
+        # A range
+      when /^.*?\.\.\.?.*?$/
+        mark(:range) + super
+      else
+        super
+      end
     end
   
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
