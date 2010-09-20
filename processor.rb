@@ -122,6 +122,17 @@ module ExplainRuby
     def process_colon3(exp)
       mark(:colon3) + super
     end
+    
+    # defined?(a)
+    # defined?(Constant)
+    def process_defined(exp)
+      mark(:defined) + super
+    end
+    
+    #  1..5 
+    def process_lit(exp)
+      mark(:dot2) + super
+    end
   
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
     SPECIALS = [:colon2]
