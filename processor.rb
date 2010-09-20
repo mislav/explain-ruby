@@ -143,6 +143,20 @@ module ExplainRuby
         super
       end
     end
+
+    # Stolen from within Ruby2Ruby
+    # Massacred to remove the useless do after the collection
+    def process_for(exp)
+      recv = process exp.shift
+      iter = process exp.shift
+      body = exp.empty? ? nil : process(exp.shift)
+
+      result = ["for #{iter.gsub("\n", "")} in #{recv}"]
+      result << indent(body ? body : "# do nothing")
+      result << "end"
+
+      mark(:for) + result.join("\n")
+    end
     
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
     SPECIALS = [:colon2]
