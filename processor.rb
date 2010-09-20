@@ -153,7 +153,7 @@ module ExplainRuby
       elsif !exp[0].nil? and SPECIALS.include? exp[0][0]
         mark(exp[0][0]) + super
       # All this crap for string interpolation.
-      elsif exp[2] && exp[2][1].sexp_type == :dstr
+      elsif exp[2] && exp[2][1] && exp[2][1].sexp_type == :dstr
         if !exp[2][1].find_nodes(:evstr).empty? 
           mark(:interpolation) + super
         end
