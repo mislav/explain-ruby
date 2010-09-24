@@ -99,7 +99,11 @@ module ExplainRuby
     end
   
     def process_lasgn(exp)
-      mark(:variable_local) + super
+      if [:masgn, :iter].include?(context[1]) 
+        super
+      else
+        mark(:variable_local) + super
+      end
     end
   
     def process_iasgn(exp)
@@ -114,11 +118,70 @@ module ExplainRuby
       mark(:super) + super
     end
   
+    def process_if(exp)
+      mark(:if) + super
+    end
+    
+    # ::Foo
+    def process_colon3(exp)
+      mark(:colon3) + super
+    end
+    
+    # defined?(a)
+    # defined?(Constant)
+    def process_defined(exp)
+      mark(:defined) + super
+    end
+    
+    # Literal values are objects that are:
+    # Numeric
+    # Symbol
+    # Range
+    # And maybe more
+    def process_lit(exp)
+      case exp[0]
+        # A range
+      when /^.*?\.\.\.?.*?$/
+        mark(:range) + super
+      else
+        super
+      end
+    end
+
+    # Stolen from within Ruby2Ruby
+    # Massacred to remove the useless do after the collection
+    def process_for(exp)
+      recv = process exp.shift
+      iter = process exp.shift
+      body = exp.empty? ? nil : process(exp.shift)
+
+      result = ["for #{iter.gsub("\n", "")} in #{recv}"]
+      result << indent(body ? body : "# do nothing")
+      result << "end"
+
+      mark(:for) + result.join("\n")
+    end
+    
+    # "string" =~ /regex/
+    def process_match3(exp)
+      mark(:tilde_match) + super
+    end
+
+    alias_method :process_match2, :process_match3
+
     CALLS = [:require, :attr_accessor, :attr_reader, :attr_writer, :include, :extend]
+    SPECIALS = [:colon2]
   
     def process_call(exp)
       if exp[0].nil? and CALLS.include? exp[1]
         mark(exp[1]) + super
+      elsif !exp[0].nil? and SPECIALS.include? exp[0][0]
+        mark(exp[0][0]) + super
+      # All this crap for string interpolation.
+      elsif exp[2] && exp[2][1] && exp[2][1].sexp_type == :dstr
+        if !exp[2][1].find_nodes(:evstr).empty? 
+          mark(:interpolation) + super
+        end
       else
         super
       end
