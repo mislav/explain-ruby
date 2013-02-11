@@ -2,9 +2,12 @@ require 'nokogiri'
 require 'ruby_parser'
 require 'processor'
 require 'digest/md5'
+require 'pp'
 require 'net/http'
 # TODO: SSL support
 # require 'net/https'
+require 'dm-migrations'
+require 'dm-timestamps'
 
 Net::HTTPResponse.class_eval do
   def html?
@@ -72,83 +75,54 @@ module ExplainRuby
   end
   
   class Code
+    include DataMapper::Resource
     extend FromUrl
-    
-    attr_reader :attributes
-    
-    def initialize(attributes)
-      @attributes = attributes
-      @reconstructed_code = nil
-      @explained_code = nil
-      @sexp = nil
+
+    property :slug,           String, :key => true
+    property :code_signature, String
+    property :url,            String
+    property :code,           Text
+
+    timestamps :created_at
+
+    def code=(code)
+      super
+      self.code_signature = self.class.md5_digest(self.code.to_s.strip)
     end
-    
-    def [](key)
-      @attributes[key.to_s]
+
+    before :create do |entry|
+      entry.slug ||= self.class.generate_slug
     end
-    
-    def []=(key, value)
-      @attributes[key.to_s] = value
-    end
-    
-    def slug() self['slug'] end
-    def md5() self['md5'] end
-    def url() self['url'] end
-    
-    class << self
-      attr_accessor :mongo
-    end
-    
+
     def self.from_url(url)
-      find_or('url' => url) do |params|
-        create(super) { |obj| obj.attributes.update(params) }
+      unless entry = first(:url => url)
+        entry = create_for_code(super) { |obj|
+          obj.url = url
+        }
       end
+      entry
     end
-    
-    def self.create(code)
-      md5 = md5_digest code
-      
-      find_or('md5' => md5) do |params|
-        obj = new({'code' => code}.update(params))
-        yield obj if block_given?
-        obj.save
+
+    def self.create_for_code(code)
+      md5 = md5_digest(code)
+      unless entry = first(:code_signature => md5)
+        entry = new(:code => code)
+        yield entry if block_given?
+        entry.save
       end
-    end
-    
-    def self.find_or(query)
-      if record = mongo.find_one(query, :fields => 'slug')
-        new(record)
-      else
-        yield query
-      end
-    end
-    
-    def self.exists?(query)
-      !!mongo.find_one(query, :fields => [])
+      entry
     end
     
     def self.md5_digest(code)
       Digest::MD5.hexdigest code.strip
     end
     
-    def self.find(slug)
-      record = mongo.find_one(:slug => slug) and new(record)
-    end
-    
     SEED = ('a'..'z').to_a
     
     def self.generate_slug
       (1..3).map { SEED[rand(SEED.length)] }.join('').tap do |slug|
-        slug << SEED[rand(SEED.length)] while exists?(:slug => slug)
+        slug << SEED[rand(SEED.length)] while all(:slug => slug).any?
       end
-    end
-    
-    def save
-      self['md5'] ||= self.class.md5_digest(self['code'])
-      self['slug'] ||= self.class.generate_slug
-      self['created_at'] ||= Time.now
-      self.class.mongo.save(@attributes, :safe => true)
-      self
     end
     
     def to_s
@@ -160,7 +134,7 @@ module ExplainRuby
     end
     
     def parse
-      self.class.ruby2sexp(self['code'], self['url'])
+      self.class.ruby2sexp(code, url)
     end
     
     # delegate pretty printing to sexp
@@ -169,7 +143,7 @@ module ExplainRuby
     end
     
     def reconstruct_code
-      @reconstructed_code ||= self.class.ruby2ruby(parse, self['url'])
+      @reconstructed_code ||= self.class.ruby2ruby(parse, url)
     end
     
     EXPLANATIONS_PATH = File.expand_path('../explanations', __FILE__)
@@ -210,137 +184,3 @@ module ExplainRuby
     end
   end
 end
-
-if $0 == __FILE__
-  require 'spec/autorun'
-  require 'pp'
-  
-  body_code, body_no_code, body_gist, body_gist_no_ruby = DATA.read.split('===')
-  
-  describe ExplainRuby::Code do
-    describe ".get_raw_url" do
-      it "translates pastie" do
-        url = described_class.get_raw_url 'http://pastie.org/pastes/1234'
-        url.should == 'http://pastie.org/1234.txt'
-      end
-      
-      it "translates github" do
-        url = described_class.get_raw_url 'http://github.com/mislav/nibbler/blob/master/lib/nibbler/json.rb'
-        url.should == 'http://github.com/mislav/nibbler/raw/master/lib/nibbler/json.rb'
-      end
-      
-      it "translates gist" do
-        gist_url = 'http://gist.github.com/540757'
-        described_class.should_receive(:get_html_document).
-          with(gist_url).and_return(Nokogiri::HTML(body_gist))
-        
-        url = described_class.get_raw_url gist_url
-        url.should == 'http://gist.github.com/raw/540/455/paperclip_defaults.rb'
-      end
-      
-      it "fails for gist without a ruby file" do
-        gist_url = 'http://gist.github.com/540757'
-        described_class.should_receive(:get_html_document).
-          with(gist_url).and_return(Nokogiri::HTML(body_gist_no_ruby))
-        
-        url = described_class.get_raw_url gist_url
-        url.should be_nil
-      end
-      
-      it "fails at unknown" do
-        url = described_class.get_raw_url 'http://example.com'
-        url.should be_nil
-      end
-    end
-    
-    describe ".extract_code_from_html" do
-      it "skips line numbers" do
-        code = described_class.extract_code_from_html body_code
-        code.should == "def foo\n  bar\nend"
-      end
-      
-      it "returns nil when no code" do
-        code = described_class.extract_code_from_html body_no_code
-        code.should be_nil
-      end
-    end
-    
-    describe "explains" do
-      it "ternary statements" do
-        code = described_class.new('code' => 'this ? that : them')
-        code.reconstruct_code.should == ">> if\nthis ? (that) : (them)"
-      end
-    end
-    
-    describe "#reconstruct_code" do
-      it "inserts explanation markers" do
-        code = described_class.new('code' => "class Klass < Main; end")
-        code.reconstruct_code.should == ">> class class_inheritance\nclass Klass < Main\nend"
-      end
-      
-      it "outputs curly brackets for one lined block arguments" do
-        code = described_class.new('code' => "foo { |one, two| one }")
-        code.reconstruct_code.should == "foo { |one, two| one }"
-      end
-      
-      it "outputs 'do' and 'end' for multi lined block arguments" do
-        code = described_class.new('code' => "foo { |one, two| one; two }")
-        code.reconstruct_code.should == "foo do |one, two|\n  one\n  two\nend"
-      end
-      
-      it "doesn't insert same marker twice" do
-        code = described_class.new('code' => "def foo() 1 end; def bar() 2 end")
-        code.reconstruct_code.should == ">> method\ndef foo\n  1\nend\n\ndef bar\n  2\nend\n"
-      end
-    end
-    
-    it "delegates pretty printing to sexp" do
-      code = described_class.new('code' => "class Klass; end")
-      code.pretty_inspect.should == "s(:class, :Klass, nil, s(:scope))\n"
-    end
-  end
-end
-
-__END__
-<body>
-  <pre>1
-2
-3</pre>
-  <pre>def foo
-  bar
-end</pre>
-</body>
-
-===
-
-<body>
-  <p>No code here</p>
-</body>
-
-===
-
-<body>
-<div class="file" id="notes.md">
-  <div class="actions">
-    <a href="/moo">moo</a>
-    <a href="/raw/540/455/notes.md">raw</a>
-  </div>
-</div>
-<div class="file" id="file_paperclip_defaults.rb">
-  <div class="actions">
-    <a href="/moo">moo</a>
-    <a href="/raw/540/455/paperclip_defaults.rb">raw</a>
-  </div>
-</div>
-</body>
-
-===
-
-<body>
-<div class="file" id="notes.md">
-  <div class="actions">
-    <a href="/moo">moo</a>
-    <a href="/raw/540/455/notes.md">raw</a>
-  </div>
-</div>
-</body>

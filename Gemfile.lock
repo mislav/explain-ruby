@@ -1,26 +1,29 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    bson (1.0.4)
-    bson_ext (1.0.4)
-    cgi_multipart_eof_fix (2.5.0)
-    daemons (1.1.0)
-    fastthread (1.0.7)
-    gem_plugin (0.2.3)
+    addressable (2.2.8)
+    data_objects (0.10.12)
+      addressable (~> 2.1)
+    dm-core (1.2.0)
+      addressable (~> 2.2.6)
+    dm-do-adapter (1.2.0)
+      data_objects (~> 0.10.6)
+      dm-core (~> 1.2.0)
+    dm-migrations (1.2.0)
+      dm-core (~> 1.2.0)
+    dm-postgres-adapter (1.2.0)
+      dm-do-adapter (~> 1.2.0)
+      do_postgres (~> 0.10.6)
+    dm-timestamps (1.2.0)
+      dm-core (~> 1.2.0)
+    do_postgres (0.10.12)
+      data_objects (= 0.10.12)
     haml (3.0.16)
-    mongo (1.0.7)
-      bson (>= 1.0.4)
-    mongo_ext (0.19.3)
-    mongrel (1.1.5)
-      cgi_multipart_eof_fix (>= 2.4)
-      daemons (>= 1.0.3)
-      fastthread (>= 1.0.1)
-      gem_plugin (>= 0.2.3)
     mustache (0.11.2)
     nokogiri (1.4.3.1)
     oniguruma (1.1.0)
     plist (3.1.0)
-    rack (1.2.1)
+    rack (1.2.8)
     rake (0.8.7)
     rdiscount (1.6.5)
     rocco (0.4)
@@ -33,8 +36,6 @@ GEM
     ruby_parser (2.0.4)
       sexp_processor (~> 3.0)
     sexp_processor (3.0.4)
-    shotgun (0.8)
-      rack (>= 1.0)
     sinatra (1.0)
       rack (>= 1.0)
     textpow (0.10.1)
@@ -47,17 +48,15 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bson_ext
+  dm-migrations
+  dm-postgres-adapter
+  dm-timestamps
   haml
-  mongo
-  mongo_ext
-  mongrel
   mustache
   nokogiri
   rake
   rocco
   rspec
   ruby2ruby
-  shotgun
   sinatra
   ultraviolet

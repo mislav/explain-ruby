@@ -1,27 +1,25 @@
 require 'sinatra'
 require 'sass'
-require 'pp'
+require 'dm-core'
 require 'code'
-require 'mongo'
 
 set :sass, { :cache_location => File.join(ENV['TMPDIR'], '.sass-cache') }
-
-configure :development do
-  connection = Mongo::Connection.from_uri 'mongodb://localhost'
-  db = connection.db('explainruby')
-  ExplainRuby::Code.mongo = db.collection('results')
-end
-
-configure :production do
-  connection = Mongo::Connection.from_uri ENV['MONGOHQ_URL']
-  db = connection.db(connection.auths.last['db_name'])
-  ExplainRuby::Code.mongo = db.collection('results')
-end
 
 require 'mustache/sinatra'
 set :mustache, { :templates => './templates', :views => './views' }
 
 require 'rocco_ext'
+
+configure :development do
+  ENV['DATABASE_URL'] ||= 'postgres://localhost/explainruby'
+  DataMapper::Logger.new($stderr, :info)
+end
+
+configure do
+  DataMapper.setup(:default, ENV['DATABASE_URL'])
+  DataMapper.finalize
+  DataMapper::Model.raise_on_save_failure = true
+end
 
 helpers do
   def redirect_to(code)
@@ -68,7 +66,7 @@ post '/' do
     code = ExplainRuby::Code.from_url params[:url]
     redirect_to code
   elsif not params[:code].empty?
-    code = ExplainRuby::Code.create params[:code]
+    code = ExplainRuby::Code.create_for_code(params[:code])
     redirect_to code
   else
     status "400 Not Chunky"
@@ -97,8 +95,8 @@ get '/docco.css' do
 end
 
 get %r!^/([a-z0-9]{3,})$! do
-  code = ExplainRuby::Code.find params[:captures][0]
+  code = ExplainRuby::Code.get(params[:captures][0])
   halt 404 unless code
-  etag code.md5
+  etag code.code_signature
   rocco(:url => code.url) { code.to_s }
 end

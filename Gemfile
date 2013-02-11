@@ -8,13 +8,12 @@ gem 'ruby2ruby'
 gem 'rocco'
 gem 'nokogiri'
 gem 'ultraviolet'
-gem 'mongo'
-gem 'mongo_ext'
-gem 'bson_ext'
+
+gem 'dm-postgres-adapter'
+gem 'dm-migrations'
+gem 'dm-timestamps'
 
 group :development do
-  gem 'mongrel'
-  gem 'shotgun'
   gem 'rake'
   gem 'rspec'
 end
