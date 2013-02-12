@@ -3,15 +3,14 @@ require 'ruby_parser'
 require 'processor'
 require 'digest/md5'
 require 'pp'
-require 'net/http'
-# TODO: SSL support
-# require 'net/https'
+require 'faraday_middleware'
 require 'dm-migrations'
 require 'dm-timestamps'
 
-Net::HTTPResponse.class_eval do
+Faraday::Response.class_eval do
   def html?
-    content_type == 'text/html' or content_type == 'application/xhtml+xml'
+    type = self['content-type'].to_s.split(';', 2).first
+    type == 'text/html' or type == 'application/xhtml+xml'
   end
 end
 
@@ -37,20 +36,23 @@ module ExplainRuby
     end
     
     def get_http_response(url)
-      response = Net::HTTP.get_response URI.parse(url)
-      response.error! unless Net::HTTPSuccess === response
-      response
+      Faraday.new { |conn|
+        conn.response :follow_redirects
+        conn.response :raise_error
+        # conn.response :logger
+        conn.adapter  Faraday.default_adapter
+      }.get(url)
     end
     
     def get_html_document(url)
       response = get_http_response(url)
-      response.error! unless response.html?
+      raise "not HTML" unless response.html?
       Nokogiri::HTML response.body
     end
     
     def get_raw_body(url)
       response = get_http_response(url)
-      response.error! if response.html?
+      raise "was HTML, expected raw" if response.html?
       response.body
     end
   
@@ -58,12 +60,12 @@ module ExplainRuby
       case url
       when %r{^(https?://pastie.org)/pastes/(\w+)$}
         url = "#{$1}/#{$2}.txt"
-      when %r{^(http://github.com/[^/]+/[^/]+)/blob/(.+)$}
+      when %r{^(https?://github.com/[^/]+/[^/]+)/blob/(.+)$}
         url = "#{$1}/raw/#{$2}"
-      when %r{^(https?://gist.github.com)/\w+$}
+      when %r{^(https?://gist.github.com)/[\w.-]+/\w+$}
         prefix = $1
         doc = get_html_document(url)
-        if raw_link = doc.at('.file[id$=".rb"] .actions a[href^="/raw/"]')
+        if raw_link = doc.search('a[href$=".rb"]').find {|a| a['href'].include?('/raw/') }
           raw_url = raw_link['href']
           raw_url = prefix + raw_url unless raw_url.index('http') == 0
           raw_url

@@ -18,7 +18,12 @@ GEM
       dm-core (~> 1.2.0)
     do_postgres (0.10.12)
       data_objects (= 0.10.12)
+    faraday (0.8.5)
+      multipart-post (~> 1.1)
+    faraday_middleware (0.9.0)
+      faraday (>= 0.7.4, < 0.9)
     haml (3.0.16)
+    multipart-post (1.1.5)
     mustache (0.11.2)
     nokogiri (1.4.3.1)
     oniguruma (1.1.0)
@@ -51,6 +56,8 @@ DEPENDENCIES
   dm-migrations
   dm-postgres-adapter
   dm-timestamps
+  faraday (~> 0.8.5)
+  faraday_middleware
   haml
   mustache
   nokogiri
