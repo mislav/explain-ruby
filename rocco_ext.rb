@@ -18,6 +18,8 @@ Rocco::Layout.template_path = Sinatra::Application.mustache[:templates]
 Rocco::Layout.template_name = 'rocco'
 
 Rocco::Layout.class_eval do
+  include TrackingCode
+
   def highlight_style
     @doc.options[:uv_style]
   end

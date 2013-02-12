@@ -8,6 +8,26 @@ set :sass, { :cache_location => File.join(ENV['TMPDIR'], '.sass-cache') }
 require 'mustache/sinatra'
 set :mustache, { :templates => './templates', :views => './views' }
 
+module TrackingCode
+  def tracking_code
+    <<-HTML
+      <script type="text/javascript">
+        var _gauges = _gauges || [];
+        (function() {
+          var t   = document.createElement('script');
+          t.type  = 'text/javascript';
+          t.async = true;
+          t.id    = 'gauges-tracker';
+          t.setAttribute('data-site-id', '511993a0f5a1f5137f00004f');
+          t.src = '//secure.gaug.es/track.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(t, s);
+        })();
+      </script>
+    HTML
+  end
+end
+
 require 'rocco_ext'
 
 configure :development do
